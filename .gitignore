@@ -2,3 +2,5 @@ config.py
 mon-1.png
 wc.png
 test.py
+__pycache__
+files

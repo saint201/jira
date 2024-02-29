@@ -6,9 +6,9 @@ import cv2
 import time
 def scrt():
     with mss.mss() as sct:
-        filename = sct.shot(output="mon-{mon}.png")
+        filename = sct.shot(output="files/mon.png")
         print(filename)
-    return(True)
+    return(filename)
 
 def msgwindow(msg):
     root = Tk()
