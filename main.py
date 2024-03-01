@@ -8,17 +8,27 @@ from aiogram.types import *
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
 from config import TOKEN
 from util import *
+from aiogram.fsm.context import FSMContext
 from aiogram.methods import SendPhoto
+from aiogram.fsm.context import FSMContext
+from aiogram.fsm.state import State, StatesGroup
 
 
 dp = Dispatcher()
+
+class Form(StatesGroup):
+    inputText = State()
+    getans = State()
+    language = State()
 
 @dp.message(F.text.in_({'/start','/hi'}))
 async def command_start_handler(message: Message) -> None:
     kb = [
         [types.KeyboardButton(text="/msg")],
-        [types.KeyboardButton(text="/mon")]
+        [types.KeyboardButton(text="/mon")],
+        [types.KeyboardButton(text="/input")]
     ]
+    global keyboard 
     keyboard = types.ReplyKeyboardMarkup(keyboard=kb)
     await message.answer("usage", reply_markup=keyboard)
 
@@ -28,6 +38,18 @@ async def commands_handler(message: types.Message) -> None:
     await bot.send_photo(chat_id=message.chat.id,photo=types.FSInputFile(scrt()))
 
 
+
+@dp.message(F.text.in_({'/input'}))
+async def commands_handler(message: types.Message, state: FSMContext) -> None:
+    await state.set_state(Form.inputText)
+    await message.answer("enter text",reply_markup=ReplyKeyboardRemove())
+
+
+@dp.message(Form.inputText)
+async def process_text(message: types.Message, state: FSMContext) -> None:
+    await state.update_data(inputText=message.text)
+    await state.set_state(Form.getans)
+    await message.answer(msgwindowAns(message.text))
 
 @dp.message()
 async def echo_handler(message: types.Message) -> None:

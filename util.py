@@ -43,11 +43,10 @@ def camUnit():
     result, image = cam.read() 
     if result: 
         cv2.imshow("wc", image) 
-        cv2.imwrite("wc.png", image) 
+        cv2.imwrite("files/wc.png", image) 
         cv2.waitKey(0) 
         cv2.destroyWindow("wc") 
         return(image)
     else: 
         print("No image detected. Please! try again") 
         return(False)
-camUnit()
