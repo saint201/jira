@@ -1,19 +1,16 @@
 import asyncio
 import logging
 import sys
-from aiogram import Bot, Dispatcher, Router, types, F
+from aiogram import Bot, Dispatcher, types, F
 from aiogram.enums import ParseMode
-from aiogram.filters import CommandStart
 from aiogram.types import *
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
-from config import TOKEN
 from util import *
 from aiogram.fsm.context import FSMContext
 from aiogram.methods import SendPhoto
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
 import multiprocessing
-import threading
 
 dp = Dispatcher()
 
@@ -82,15 +79,15 @@ async def echo_handler(message: types.Message) -> None:
         await message.answer("NA")
 
 
-async def main() -> None:
+async def main(TOKEN) -> None:
     global bot
     bot = Bot(TOKEN, parse_mode=ParseMode.HTML)
     await dp.start_polling(bot)
     
 
-def starter():
+def starter(TOKEN):
     logging.basicConfig(level=logging.INFO, stream=sys.stdout)
-    asyncio.run(main())
+    asyncio.run(main(TOKEN))
     
 
 
@@ -98,7 +95,5 @@ def show_text(text):
     msgwindow(text)
 if __name__ =="__main__":
     starter()
-    #t1 = threading.Thread(target=starter)
-    #t1.start()
-    #t1.join()
+
     

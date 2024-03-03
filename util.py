@@ -6,7 +6,10 @@ import cv2
 import time
 import threading
 import requests
-from config import TOKEN
+import json
+f = open('config.json')
+data = json.load(f)
+TOKEN = data['TOKEN']
 def scrt():
     with mss.mss() as sct:
         filename = sct.shot(output="files/mon.png")
