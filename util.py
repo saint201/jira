@@ -6,10 +6,36 @@ import cv2
 import time
 import threading
 import requests
+from datetime import datetime
 import json
-f = open('config.json')
-data = json.load(f)
-TOKEN = data['TOKEN']
+def setToken(newToken):
+    f = open('config.json')
+    data = json.load(f)
+    data['TOKEN']=newToken
+    with open('config.json', 'w') as f:
+        json.dump(data, f)
+def getToken():
+    f = open('config.json')
+    data = json.load(f)
+    TOKEN = data['TOKEN']
+    json.dumps(data)
+    return(TOKEN)
+def readhistory():
+    f = open('config.json')
+    data = json.load(f)
+    data["history"]
+    with open('config.json', 'w') as f:
+        json.dump(data, f)
+    return(data["history"])
+def addhistory(id,text,user):
+    now = datetime.now()
+    dt_string = now.strftime("%b/%d/%Y %H:%M:%S")
+    f = open('config.json')
+    data = json.load(f)
+    data["history"].insert(0,"ID "+str(id)+" | "+dt_string+" | USER @"+user+" | ACTION: "+text)
+    with open('config.json', 'w') as f:
+        json.dump(data, f)
+
 def scrt():
     with mss.mss() as sct:
         filename = sct.shot(output="files/mon.png")
@@ -26,6 +52,9 @@ def msgwindow(msg):
     
 
 def msgwindowAns(id,msg):
+    f = open('config.json')
+    data = json.load(f)
+    TOKEN = data['TOKEN']
     def get_data():
         global mesg
         mesg=passw_var.get()

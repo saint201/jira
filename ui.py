@@ -9,14 +9,15 @@
 
 
 from PyQt5 import QtCore, QtGui, QtWidgets
-from main import starter
+
 import multiprocessing
 import json
-f = open('config.json')
-data = json.load(f)
-TOKEN = data['TOKEN']
+from util import *
+
+
 class Ui_Dialog(object):
     def setupUi(self, Dialog):
+        global historyList 
         Dialog.setObjectName("Dialog")
         Dialog.setFixedSize(540, 420)
         self.tabWidget = QtWidgets.QTabWidget(Dialog)
@@ -76,7 +77,7 @@ class Ui_Dialog(object):
         self.applyBut = QtWidgets.QPushButton(self.tab)
         self.applyBut.setGeometry(QtCore.QRect(250, 260, 51, 31))
         self.applyBut.setObjectName("applyBut")
-        self.applyBut.clicked.connect(self.writeCfg)
+        self.applyBut.clicked.connect(self.writeToken)
 
         self.tabWidget.addTab(self.tab, "")
         self.tab_2 = QtWidgets.QWidget()
@@ -84,27 +85,28 @@ class Ui_Dialog(object):
         self.tabWidget.addTab(self.tab_2, "")
         self.tab_3 = QtWidgets.QWidget()
         self.tab_3.setObjectName("tab_3")
-        self.historyList = QtWidgets.QListWidget(self.tab_3)
-        self.historyList.setGeometry(QtCore.QRect(0, 0, 551, 341))
-        self.historyList.setObjectName("historyList")
-        item = QtWidgets.QListWidgetItem()
-        self.historyList.addItem(item)
+        historyList = QtWidgets.QListWidget(self.tab_3)
+        historyList.setGeometry(QtCore.QRect(0, 0, 551, 341))
+        historyList.setObjectName("historyList")
         self.filterLine = QtWidgets.QLineEdit(self.tab_3)
         self.filterLine.setGeometry(QtCore.QRect(10, 350, 231, 21))
         self.filterLine.setObjectName("filterLine")
         self.findBut = QtWidgets.QPushButton(self.tab_3)
         self.findBut.setGeometry(QtCore.QRect(250, 350, 75, 23))
         self.findBut.setObjectName("findBut")
+        self.findBut.clicked.connect(self.findHistory)
         self.tabWidget.addTab(self.tab_3, "")
-
+        self.tabWidget.tabBarClicked.connect(self.handle_tabbar_clicked)
         self.retranslateUi(Dialog)
         self.tabWidget.setCurrentIndex(0)
         QtCore.QMetaObject.connectSlotsByName(Dialog)
+    
 
     def retranslateUi(self, Dialog):
+        global historyList 
         _translate = QtCore.QCoreApplication.translate
         Dialog.setWindowTitle(_translate("Dialog", "Jira | status - stoped"))
-        self.token.setText(_translate("Dialog", TOKEN))
+        self.token.setText(_translate("Dialog", getToken()))
         self.token.setPlaceholderText(_translate("Dialog", "TOKEN"))
         self.startWW.setText(_translate("Dialog", "start with windows"))
         self.stopBut.setText(_translate("Dialog", "STOP"))
@@ -115,14 +117,41 @@ class Ui_Dialog(object):
         self.notify.setText(_translate("Dialog", "notify registered users "))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab), _translate("Dialog", "setup"))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_2), _translate("Dialog", "config"))
-        __sortingEnabled = self.historyList.isSortingEnabled()
-        self.historyList.setSortingEnabled(False)
-        item = self.historyList.item(0)
-        item.setText(_translate("Dialog", "ID 02530496  |  TIME 2:39 AM | NAME MSFDS  |  ACTION /mon"))
-        self.historyList.setSortingEnabled(__sortingEnabled)
         self.filterLine.setPlaceholderText(_translate("Dialog", "filter"))
         self.findBut.setText(_translate("Dialog", "FIND"))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_3), _translate("Dialog", "history"))
+        __sortingEnabled = historyList.isSortingEnabled()
+        historyList.setSortingEnabled(False)
+        historyList.setSortingEnabled(__sortingEnabled)
+    def findHistory(self):
+        _translate = QtCore.QCoreApplication.translate
+        if "" !=self.filterLine.text():
+            historyList.clear()
+            filtredHistory = []
+            for i in readhistory():
+                if self.filterLine.text() in i:
+                    filtredHistory.append(i)
+            for index, i in enumerate(filtredHistory):
+                    item = QtWidgets.QListWidgetItem()
+                    historyList.addItem(item)
+                    item = historyList.item(index)
+                    item.setText(_translate("Dialog", i))
+        else:
+            for index, i in enumerate(readhistory()):
+                item = QtWidgets.QListWidgetItem()
+                historyList.addItem(item)
+                item = historyList.item(index)
+                item.setText(_translate("Dialog", i))
+    def handle_tabbar_clicked(self, index):
+        if index == 2:
+            historyList.clear()
+            _translate = QtCore.QCoreApplication.translate
+            for index, i in enumerate(readhistory()):
+                item = QtWidgets.QListWidgetItem()
+                historyList.addItem(item)
+                item = historyList.item(index)
+                item.setText(_translate("Dialog", i))
+        
     def stop_bot(self, Dialog):
         try:
             p.terminate()
@@ -130,16 +159,15 @@ class Ui_Dialog(object):
         _translate = QtCore.QCoreApplication.translate
         Dialog.setWindowTitle(_translate("Dialog", "Jira | status - stoped"))
     def start_bot(self, Dialog):
+        from main import starter
         _translate = QtCore.QCoreApplication.translate
         global p
-        data['TOKEN']=self.token.text()
-        p = multiprocessing.Process(target=starter,args=(TOKEN,))
+
+        p = multiprocessing.Process(target=starter,args=(getToken(),))
         p.start()
         Dialog.setWindowTitle(_translate("Dialog", "Jira | status - run"))
-    def writeCfg(self):
-        data['TOKEN']=self.token.text()
-        with open('config.json', 'w') as f:
-            json.dump(data, f)
+    def writeToken(self):
+        setToken(self.token.text())
 def start_ui():
     import sys
     app = QtWidgets.QApplication(sys.argv)

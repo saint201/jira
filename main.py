@@ -20,7 +20,7 @@ class Form(StatesGroup):
     msgtext = State()
 
 @dp.message(F.text.in_({'/start','/hi'}))
-async def command_start_handler(message: Message) -> None:
+async def command_start_handler(message: types.Message) -> None:
     kb = [
         [types.KeyboardButton(text="/msg")],
         [types.KeyboardButton(text="/mon")],
@@ -29,7 +29,8 @@ async def command_start_handler(message: Message) -> None:
     global keyboard 
     keyboard = types.ReplyKeyboardMarkup(keyboard=kb)
     await message.answer("usage", reply_markup=keyboard)
-
+    from ui import Ui_Dialog
+    addhistory(message.from_user.id,message.text,message.from_user.username)
 @dp.message(F.text.in_({'/mon'}))
 async def commands_handler(message: types.Message) -> None:
     await message.answer("monitor:")
@@ -93,7 +94,3 @@ def starter(TOKEN):
 
 def show_text(text):
     msgwindow(text)
-if __name__ =="__main__":
-    starter()
-
-    
