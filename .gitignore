@@ -5,3 +5,11 @@ test.py
 __pycache__
 files
 config.json
+Scripts
+Lib
+uiv2.py
+jira.ui
+pyvenv.cfg
+build
+dist
+ui.dist

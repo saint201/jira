@@ -2,44 +2,89 @@ import mss
 import tkinter as tk
 from tkinter import *
 from cv2 import *
+import pyautogui as pyg
 import cv2
 import time
-import threading
 import requests
 from datetime import datetime
 import json
+import os
+import numpy
+
 def setToken(newToken):
     f = open('config.json')
     data = json.load(f)
     data['TOKEN']=newToken
     with open('config.json', 'w') as f:
-        json.dump(data, f)
+        json.dump(data, f,indent=2)
+
+def setStartState(state):
+    f = open('config.json')
+    data = json.load(f)
+    data['startWithWindows']=state
+    with open('config.json', 'w') as f:
+        json.dump(data, f,indent=2)
+
+def getStartState():
+    f = open('config.json')
+    data = json.load(f)
+    state = data['startWithWindows']
+    with open('config.json', 'w') as f:
+        json.dump(data, f,indent=2)
+    return(state)
+
 def getToken():
     f = open('config.json')
     data = json.load(f)
     TOKEN = data['TOKEN']
-    json.dumps(data)
+    with open('config.json', 'w') as f:
+        json.dump(data, f,indent=2)
     return(TOKEN)
+
 def readhistory():
     f = open('config.json')
     data = json.load(f)
     data["history"]
     with open('config.json', 'w') as f:
-        json.dump(data, f)
+        json.dump(data, f,indent=2)
     return(data["history"])
-def addhistory(id,text,user):
+
+async def addhistory(id,text,user):
     now = datetime.now()
     dt_string = now.strftime("%b/%d/%Y %H:%M:%S")
     f = open('config.json')
     data = json.load(f)
     data["history"].insert(0,"ID "+str(id)+" | "+dt_string+" | USER @"+user+" | ACTION: "+text)
     with open('config.json', 'w') as f:
-        json.dump(data, f)
+        json.dump(data, f,indent=2)
 
 def scrt():
     with mss.mss() as sct:
         filename = sct.shot(output="files/mon.png")
-        print(filename)
+    return(filename)
+
+def clickByPhoto():
+    imagerz = cv2.imread('files/gotDot.png')
+    imgfindgray = numpy.array(imagerz)
+    hsv_min = numpy.array((1, 80, 80), numpy.uint8)
+    hsv_max = numpy.array((20,250,250), numpy.uint8)
+    hsv = cv2.cvtColor(imgfindgray, cv2.COLOR_BGR2HSV)
+    thresh = cv2.inRange(hsv, hsv_min, hsv_max)
+    moments = cv2.moments(thresh, 1)
+    dM01 = moments['m01']
+    dM10 = moments['m10']
+    dArea = moments['m00']
+    x = int(dM10 / dArea)
+    y = int(dM01 / dArea)
+    pyg.click(x * 1.5, y * 1.5)
+    os.remove('files/gotDot.png')
+
+def sendingGrayScale():
+    with mss.mss() as sct:
+        filename = sct.shot(output="files/mon.png")
+    image = cv2.imread('files/mon.png')
+    gray_image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    cv2.imwrite("files/mon.png", gray_image)
     return(filename)
 
 def msgwindow(msg):
@@ -50,7 +95,8 @@ def msgwindow(msg):
     l.pack()
     mainloop()
     
-
+def doubleClick():
+    pyg.doubleClick()
 def msgwindowAns(id,msg):
     f = open('config.json')
     data = json.load(f)
