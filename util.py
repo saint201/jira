@@ -44,7 +44,6 @@ def getToken():
 def readhistory():
     f = open('config.json')
     data = json.load(f)
-    data["history"]
     with open('config.json', 'w') as f:
         json.dump(data, f,indent=2)
     return(data["history"])
@@ -97,10 +96,30 @@ def msgwindow(msg):
     
 def doubleClick():
     pyg.doubleClick()
-def msgwindowAns(id,msg):
+
+def rightClick():
+    pyg.rightClick()
+
+def pressButton(but):
+    pyg.keyDown(but)
+    pyg.keyUp(but)
+
+def getRegistredUsers():
     f = open('config.json')
     data = json.load(f)
-    TOKEN = data['TOKEN']
+    with open('config.json', 'w') as f:
+        json.dump(data, f,indent=2)
+    return(data["registred_users"])
+def botOnlineAllert():
+    for i in getRegistredUsers():
+        botSendMessage(i,"bot is online /start - to use")
+
+def botSendMessage(id,text):
+    TOKEN = getToken()
+    url = f"https://api.telegram.org/bot{TOKEN}/sendMessage?chat_id={id}&text={text}"
+    requests.get(url)
+
+def msgwindowAns(id,msg):
     def get_data():
         global mesg
         mesg=passw_var.get()
@@ -114,8 +133,7 @@ def msgwindowAns(id,msg):
     button = tk.Button(master, text='send' , width=10, command=get_data)
     button.pack() 
     mainloop()
-    url = f"https://api.telegram.org/bot{TOKEN}/sendMessage?chat_id={id}&text={mesg}"
-    requests.get(url)
+    botSendMessage(id,mesg)
 
 def camUnit():
     cam = cv2.VideoCapture(0) 
